@@ -1,113 +1,156 @@
-import Image from 'next/image'
+'use client' //required so that API call works client-side
+
+import React, { useState, useEffect } from 'react';
+
+// initalise for throttleFunction as 0 so that it always triggers on first click
+let prev = 0;
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+    //Throttle function to limit the number of API calls the user can make (i.e. by spamming the button)
+    const throttleFunction = (func, delay) => {
+        // Current called time of the function
+        let now = new Date().getTime();
+        // Logging the difference between previously
+        // called and current called timings
+        let timeElapsed = now - prev;
+        // If difference is greater than delay call
+        // the function again.
+        if (timeElapsed > delay) {
+            prev = now;
+            return func();
+        }
+    }
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+    const [data, setData] = useState({});
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+    const parseForm = (formName) => {
+        const form = document.getElementById(formName);
+        const formData = new FormData(form);
+        const payLoad = new URLSearchParams(formData);
+        const payLoadStr = payLoad.toString();
+        getBoredApiRand(payLoad);
+        return;
+    }
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
+    const getBoredApiRand = async (params) => {
+        const res = await fetch(`http://www.boredapi.com/api/activity/?${params}`);
+        const repo = await res.json();
+        setData(repo);
+        return repo;
+    }
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    useEffect(() => {
+        getBoredApiRand();
+    }, []); //[] second empty argument required so it only runs once on load to get initial data
+
+    return (
+        <section className='sectionContainer'>
+            <section className='slide purp-green flex flex-col items-center text-white'>
+                <header className='font-vm font-bold'>
+                    <h2 className='m-3 text-center'>Bored API!</h2>
+                    <h3 className='mx-7 my-3 text-2xl text-center'>Are you bored? Select your preferences and click 'Give me something to do!'
+                    </h3>
+                    <h3 className='text-2xl text-center'>If you're feeling really adventurous, simply hit 'Randomise'. Enjoy!</h3>
+                </header>
+
+                <section className='preferencesContainer'>
+                    <form className='prefForm' id="prefForm">
+                        <label className='mr-2'>Accessibility:</label>
+                        <input type='number' min='0' max='1' step='0.1' name="accessibility" className='text-black text-center' />
+                        {/* <input type='range' min='0' max='1' step='0.1' name="accessibility" className='text-black' /> */}
+                        {/* <output htmlFor="accessibility" className='output' value='1'></output> */}
+
+                        <label className='ml-5 mr-2'>Type:</label>
+                        {/* <input type='text'></input> */}
+                        <select name="type" className='text-black'>
+                            <option value={""}></option>
+                            <option value={"education"}>Education</option>
+                            <option value={"recreational"}>Recreational</option>
+                            <option value={"social"}>Social</option>
+                            <option value={"diy"}>Diy</option>
+                            <option value={"charity"}>Charity</option>
+                            <option value={"cooking"}>Cooking</option>
+                            <option value={"relaxation"}>Relaxation</option>
+                            <option value={"music"}>Music</option>
+                            <option value={"busywork"}>Busywork</option>
+                        </select>
+
+                        <label className='ml-5 mr-2'>Participants:</label>
+                        <input type='number' min='1' max='8' name="participants" className='text-black text-center' />
+
+                        <label className='ml-5 mr-2'>Price:</label>
+                        <input type='number' min='0.0' max='1.0' step='0.1' name="price" className='text-black text-center' />
+                    </form>
+                </section>
+
+                <section className='buttonContainer flex flex-row'>
+                    <button
+                        type='button'
+                        className='bg-orange-400 rounded m-5 w-60 h-10 text-l shadow-lg hover:underline hover:border hover:bg-orange-500'
+                        form="prefForm"
+                        value="Submit"
+                        onClick={() => parseForm("prefForm")} //Update to throttle as well
+                    // onClick={() => throttleFunction(getBoredApiRand, 500)}
+                    >
+                        Give me something to do!
+                    </button>
+                    <button
+                        type='button'
+                        className='bg-purple-400 rounded m-5 w-60 h-10 text-xl shadow-lg hover:underline hover:border hover:bg-purple-500'
+                        onClick={() => throttleFunction(getBoredApiRand, 500)}
+                    >
+                        Randomise!
+                    </button>
+                </section>
+
+                <section className='boredApiOutPut flex flex-col w-full justify-center items-center'>
+                    <section>
+                        <label className='text-left mr-3'>Activity: </label>
+                        <p>{data.activity}</p>
+                    </section>
+                    <section>
+                        <label className='text-left mr-3'>Accessibility: </label>
+                        <p>{data.accessibility}</p>
+                    </section>
+                    <section>
+                        <label className='text-left mr-3'>Type: </label>
+                        <p>{data.type}</p>
+                    </section>
+                    <section>
+                        <label className='text-left mr-3'>Participants: </label>
+                        <p>{data.participants}</p>
+                    </section>
+                    <section>
+                        <label className='text-left mr-3'>Price: </label>
+                        <p>{data.price}</p>
+                    </section>
+                    <section>
+                        <label className='text-left mr-3'>Link: </label>
+                        <p>
+                            <a href={data.link != "" ? data.link : null}
+                                className={data.link != "" ? 'hover:underline' : ""} //'hover:underline'
+                            >
+                                {data.link != "" ? data.link : "N/A"}
+                            </a>
+                        </p>
+                    </section>
+                    {/* <p>"key": ""</p> */}
+                </section>
+                {/* <section className='flex flex-col items-left w-full text-xl mr-3'> */}
+                {/* <p>{data.activity}</p> */}
+                {/* <p>"key": ""</p> */}
+                {/* </section> */}
+                {/* </section> */}
+
+            </section>
+            <section className='slide orange-red'>
+                <h2>Section 2 header</h2>
+            </section>
+            <section className='slide blue-pink'>
+                <h2>Section 3 header</h2>
+            </section>
+        </section >
+    )
+    // return <Link href="/testing_folder">Dashboard</Link>
 }
