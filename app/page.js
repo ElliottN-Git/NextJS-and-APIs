@@ -49,9 +49,9 @@ export default function Home() {
             <section className='slide purp-green flex flex-col items-center text-white'>
                 <header className='font-vm font-bold'>
                     <h2 className='m-3 text-center'>Bored API!</h2>
-                    <h3 className='mx-7 my-3 text-2xl text-center'>Are you bored? Select your preferences and click 'Give me something to do!'
+                    <h3 className='mx-7 my-3 text-2xl text-center'>Are you bored? Select your preferences and click `&apos`Give me something to do!`&apos`
                     </h3>
-                    <h3 className='text-2xl text-center'>If you're feeling really adventurous, simply hit 'Randomise'. Enjoy!</h3>
+                    <h3 className='text-2xl text-center'>If you`&apos`re feeling really adventurous, simply hit &aposRandomise&apos. Enjoy!</h3>
                 </header>
 
                 <section className='preferencesContainer'>
